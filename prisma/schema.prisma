@@ -14,13 +14,17 @@ model User {
   //name       type    attributes
   id             String          @id @default(uuid())
   name           String
-  email          String
-  isAdmin        Boolean
+  email          String          @unique
+  role           Role            @default(BASIC)
   // one to many relationship
   posts          Post[]          @relation("personalPost")
   favoritePost   Post[]          @relation("favoritePost")
   // one to one relationship
   UserPreference UserPreference?
+
+  // block level attributes
+  @@unique([name, email])
+  @@index([email])
 }
 
 model UserPreference {
@@ -32,9 +36,10 @@ model UserPreference {
 
 model Post {
   id             String     @id @default(uuid())
-  rating         Float
-  createdAt      DateTime
-  updatedAt      DateTime?
+  title          String
+  averageRating  Float
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
   author         User       @relation("personalPost", fields: [authorId], references: [id])
   authorId       String
   favoritePost   User?      @relation("favoritePost", fields: [favoritePostId], references: [id])
@@ -45,5 +50,11 @@ model Post {
 
 model Category {
   id    String @id @default(uuid())
+  name  String
   posts Post[]
+}
+
+enum Role {
+  BASIC
+  ADMIN
 }
